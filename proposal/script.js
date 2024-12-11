@@ -552,38 +552,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
     const music = document.getElementById('background-music');
+    const prompt = document.getElementById('prompt');
 
-    // Retrieve playback time from localStorage
-    const savedTime = localStorage.getItem('musicPlaybackTime');
-    if (savedTime) {
-        music.currentTime = parseFloat(savedTime);
+    // Attempt autoplay
+    const playPromise = music.play();
+    if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+            console.warn("Autoplay prevented:", error);
+            prompt.style.display = 'block'; // Show prompt
+        });
     }
 
-    // Check if the user has already interacted with the page
-    let userInteracted = false;
-
-    const startMusic = () => {
-        if (!userInteracted) {
-            userInteracted = true;
-            music.play()
-                .then(() => {
-                    console.log("Music started playing!");
-                })
-                .catch((error) => {
-                    console.warn("Autoplay was prevented:", error);
-                });
-        }
-    };
-
-    // Listen for any user interaction
-    document.addEventListener('click', startMusic, { once: true });
-    document.addEventListener('keydown', startMusic, { once: true });
-
-    // Save playback time before the page unloads
-    window.addEventListener('beforeunload', () => {
-        localStorage.setItem('musicPlaybackTime', music.currentTime);
+    // Unmute on user interaction
+    document.body.addEventListener('click', () => {
+        music.play();
+        prompt.style.display = 'none'; // Hide prompt
     });
 });
 
